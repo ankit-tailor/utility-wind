@@ -3,7 +3,7 @@ import "./styles/index.css";
 
 const App = () => {
   return (
-    <div className="flex" flex={1} bg="black" items="center" justify="center">
+    <div $flex flex={1} bg="black" items="center" justify="center">
       <button
         bg="green-500"
         rounded="md"

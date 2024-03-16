@@ -30,13 +30,29 @@ module.exports = function (babel) {
           let className = "";
           if (attributesList) {
             attributesList.forEach((element) => {
-              if (!t.isIdentifier(element.value)) {
-                const elementName = element.name.name;
-                let elementValue = element.value;
+              const elementName = element.name.name;
+              let elementValue = element.value;
+              if (!elementValue) {
+                if (elementName.startsWith("$")) {
+                  if (!elementValue) {
+                    const property = elementName.slice(1);
 
-                if (variantList.includes(elementName)) {
-                  if (t.isJSXExpressionContainer(element.value)) {
-                    if (t.isObjectExpression(elementValue.expression)) {
+                    if (
+                      classList.includes(property) ||
+                      variantList.includes(property)
+                    ) {
+                      className += property + " ";
+                    }
+                  } else {
+                    propsToBePersisted.push(element);
+                  }
+                } else {
+                  propsToBePersisted.push(element);
+                }
+              } else if (t.isJSXExpressionContainer(element.value)) {
+                if (!t.isIdentifier(elementValue.expression)) {
+                  if (t.isObjectExpression(elementValue.expression)) {
+                    if (variantList.includes(elementName)) {
                       const { result } =
                         convertExpressionContainerToStaticObject(
                           elementValue.expression.properties
@@ -50,30 +66,48 @@ module.exports = function (babel) {
                           [elementName]
                         );
                       className += variantResolvedValueList.join(" ") + " ";
+                    } else {
+                      propsToBePersisted.push(element);
+                    }
+                  } else {
+                    elementValue = elementValue.expression.value;
+
+                    if (elementName === "className") {
+                      className += elementValue + " ";
+                    }
+
+                    if (
+                      classList.includes(`${elementName}-${elementValue}`) ||
+                      variantList.includes(`${elementName}-${elementValue}`)
+                    ) {
+                      className += `${elementName}-${elementValue} `;
+                    } else if (aliasesList.includes(elementName)) {
+                      className += `${elementName}-[${elementValue}] `;
+                    } else {
+                      propsToBePersisted.push(element);
                     }
                   }
                 } else {
-                  if (t.isJSXExpressionContainer(element.value)) {
-                    elementValue = elementValue.expression.value;
-                  } else {
-                    elementValue = elementValue.value;
-                  }
-
-                  if (elementName === "className") {
-                    className += elementValue + " ";
-                  }
-
-                  if (
-                    classList.includes(`${elementName}-${elementValue}`) ||
-                    variantList.includes(`${elementName}-${elementValue}`)
-                  ) {
-                    className += `${elementName}-${elementValue} `;
-                  } else if (aliasesList.includes(elementName)) {
-                    className += `${elementName}-[${elementValue}] `;
-                  } else {
-                    propsToBePersisted.push(element);
-                  }
+                  propsToBePersisted.push(element);
                 }
+              } else if (t.isStringLiteral(elementValue)) {
+                elementValue = elementValue.value;
+                if (elementName === "className") {
+                  className += elementValue + " ";
+                }
+
+                if (
+                  classList.includes(`${elementName}-${elementValue}`) ||
+                  variantList.includes(`${elementName}-${elementValue}`)
+                ) {
+                  className += `${elementName}-${elementValue} `;
+                } else if (aliasesList.includes(elementName)) {
+                  className += `${elementName}-[${elementValue}] `;
+                } else {
+                  propsToBePersisted.push(element);
+                }
+              } else {
+                propsToBePersisted.push(element);
               }
             });
 
