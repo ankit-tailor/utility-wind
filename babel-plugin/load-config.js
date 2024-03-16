@@ -5,34 +5,42 @@ const resolveConfig = require("tailwindcss/resolveConfig.js");
 const { createContext } = require("tailwindcss/lib/lib/setupContextUtils.js");
 
 function getConfigPath() {
-  if (fs.existsSync(path.join(process.cwd(), "./tailwind.config.js"))) {
-    return path.join(process.cwd(), "./tailwind.config.js");
+  try {
+    if (fs.existsSync(path.join(process.cwd(), "./tailwind.config.js"))) {
+      return path.join(process.cwd(), "./tailwind.config.js");
+    }
+    throw new Error(
+      "Tailwind config file not found. Please create a tailwind.config.js file in the root of your project."
+    );
+  } catch (err) {
+    throw new Error(err, "Error in getConfigPath");
   }
-
-  throw new Error(
-    "Tailwind config file not found. Please create a tailwind.config.js file in the root of your project."
-  );
 }
 
 function getConfig() {
-  const configFile = getConfigPath();
-  const userConfig = resolveConfig(configFile);
+  try {
+    const configFile = getConfigPath();
+    const userConfig = resolveConfig(configFile);
 
-  const ctx = createContext(userConfig);
+    const ctx = createContext(userConfig);
 
-  return {
-    context: ctx,
-    config: userConfig,
-  };
+    return {
+      context: ctx,
+      config: userConfig,
+    };
+  } catch (err) {
+    throw new Error(err, "Error in getConfig");
+  }
 }
 
 function getAliasesList(tailwindUserContext) {
-  const aliasesList = Array.from(tailwindUserContext?.candidateRuleMap.keys());
+  const aliasesList = [...tailwindUserContext?.candidateRuleMap.keys()];
   return aliasesList;
 }
 
 function getClassList(tailwindUserContext) {
   const classList = tailwindUserContext.getClassList();
+
   return classList;
 }
 

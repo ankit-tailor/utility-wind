@@ -10,6 +10,7 @@ const {
 const {
   getClassListFromVariantProp,
 } = require("./get-variant-classlist-props");
+const { generateTypes } = require("./generate-types");
 const t = require("@babel/types");
 
 const processElementWithoutValue = (
@@ -133,6 +134,8 @@ module.exports = function (babel) {
   const aliasesList = getAliasesList(tailwindUserContext);
   const classList = getClassList(tailwindUserContext);
   const variantList = getVariantList(tailwindUserContext);
+
+  generateTypes();
 
   return {
     visitor: {
