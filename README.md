@@ -1,6 +1,6 @@
 # Utility Wind
 
-Zero runtime utility props support for tailwind classes.
+Zero runtime and fully typed utility props support for tailwind classes.
 
 ### Usage
 
