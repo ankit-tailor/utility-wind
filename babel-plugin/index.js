@@ -1,5 +1,11 @@
+const { getAliasesList, getClassList, getConfig } = require("./load-config");
+
 module.exports = function (babel) {
   const { types: t } = babel;
+
+  const { context: tailwindUseContext, config: tailwindConfig } = getConfig();
+  const aliasesList = getAliasesList(tailwindUseContext);
+  const classList = getClassList(tailwindUseContext);
 
   return {
     visitor: {
@@ -7,6 +13,7 @@ module.exports = function (babel) {
         const filename = state.file.opts.filename;
 
         if (!filename.includes("node_modules") && !filename.includes(".expo")) {
+          const propsToBePersisted = [];
           const attributesList = jsxOpeningPath.node.attributes;
           let className = "";
           if (attributesList) {
@@ -15,25 +22,32 @@ module.exports = function (babel) {
                 const elementName = element.name.name;
                 let elementValue = element.value;
 
-                if (t.isJSXExpressionContainer(element.value)) {
-                  elementValue = elementValue.expression.value;
+                if (aliasesList.includes(elementName)) {
+                  if (t.isJSXExpressionContainer(element.value)) {
+                    elementValue = elementValue.expression.value;
+                  } else {
+                    elementValue = elementValue.value;
+                  }
+
+                  console.log("elementValue", elementValue, elementName);
+
+                  if (elementName === "className") {
+                    className = elementValue;
+                  }
+
+                  if (classList.includes(`${elementName}-${elementValue}`)) {
+                    className += `${elementName}-${elementValue} `;
+                  } else {
+                    className += `${elementName}-[${elementValue}] `;
+                  }
                 } else {
-                  elementValue = elementValue.value;
+                  propsToBePersisted.push(element);
                 }
-
-                console.log("elementValue", elementValue, elementName);
-
-                if (elementName === "className") {
-                  className = elementValue;
-                }
-
-                className += `${elementName}-${elementValue} `;
               }
             });
 
-            console.log("className", className);
-
             jsxOpeningPath.node.attributes = [
+              ...propsToBePersisted,
               t.jsxAttribute(
                 t.jsxIdentifier("className"),
                 t.stringLiteral(className)

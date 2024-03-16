@@ -3,7 +3,7 @@ import "./styles/index.css";
 
 const App = () => {
   return (
-    <div bg="red-500" p="4" border="4" border="yellow-500">
+    <div bg="red-500" p="47px" border="4" border="yellow-500">
       App
     </div>
   );
