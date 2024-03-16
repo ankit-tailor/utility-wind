@@ -3,17 +3,19 @@ import "./styles/index.css";
 
 const App = () => {
   return (
-    <div
-      bg="red"
-      p="47px"
-      border="4"
-      border="yellow-500"
+    <button
+      flex={1}
+      bg="green-500"
+      items="center"
+      justify="center"
+      px="4"
+      py="3.5"
       hover={{
-        bg: "red-500",
+        bg: "green-600",
       }}
     >
-      App
-    </div>
+      Hello world
+    </button>
   );
 };
 

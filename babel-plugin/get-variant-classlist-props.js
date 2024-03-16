@@ -22,7 +22,10 @@ function getClassListFromVariantProp(
         const keyString = keyPath.join(":") + `:${key}-${propsObject[key]}`;
         tailwindClassConvertedList.push(keyString);
       }
-    } else if (classList.includes(`${key}-${propsObject[key]}`)) {
+    } else if (
+      classList.includes(`${key}-${propsObject[key]}`) ||
+      variantList.includes(`${key}-${propsObject[key]}`)
+    ) {
       const keyString = keyPath.join(":") + `:${key}-${propsObject[key]}`;
       tailwindClassConvertedList.push(keyString);
     } else {

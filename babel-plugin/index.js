@@ -52,7 +52,7 @@ module.exports = function (babel) {
                       className += variantResolvedValueList.join(" ") + " ";
                     }
                   }
-                } else if (aliasesList.includes(elementName)) {
+                } else {
                   if (t.isJSXExpressionContainer(element.value)) {
                     elementValue = elementValue.expression.value;
                   } else {
@@ -60,16 +60,19 @@ module.exports = function (babel) {
                   }
 
                   if (elementName === "className") {
-                    className = elementValue;
+                    className += elementValue + " ";
                   }
 
-                  if (classList.includes(`${elementName}-${elementValue}`)) {
+                  if (
+                    classList.includes(`${elementName}-${elementValue}`) ||
+                    variantList.includes(`${elementName}-${elementValue}`)
+                  ) {
                     className += `${elementName}-${elementValue} `;
-                  } else {
+                  } else if (aliasesList.includes(elementName)) {
                     className += `${elementName}-[${elementValue}] `;
+                  } else {
+                    propsToBePersisted.push(element);
                   }
-                } else {
-                  propsToBePersisted.push(element);
                 }
               }
             });
