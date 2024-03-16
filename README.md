@@ -2,7 +2,11 @@
 
 Zero runtime and fully typed utility props support for tailwind classes.
 
-### Usage
+## Introduction
+
+Utility Wind is a library that provides zero runtime and fully typed utility props support for tailwind classes. It transpiles utility props to tailwind classes at build time, so you don't have to worry about the runtime cost of using utility props.
+
+## Usage
 
 ```jsx
 const App = () => {
