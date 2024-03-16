@@ -1,6 +1,10 @@
-import React from "react";
-import "./styles/index.css";
+# Utility Wind
 
+Zero runtime utility props support for tailwind classes.
+
+### Usage
+
+```jsx
 const App = () => {
   return (
     <div className="flex" flex={1} bg="black" items="center" justify="center">
@@ -28,5 +32,4 @@ const App = () => {
     </div>
   );
 };
-
-export default App;
+```
