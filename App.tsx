@@ -3,7 +3,15 @@ import "./styles/index.css";
 
 const App = () => {
   return (
-    <div bg="red-500" p="47px" border="4" border="yellow-500">
+    <div
+      bg="red"
+      p="47px"
+      border="4"
+      border="yellow-500"
+      hover={{
+        bg: "red-500",
+      }}
+    >
       App
     </div>
   );

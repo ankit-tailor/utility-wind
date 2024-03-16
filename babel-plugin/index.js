@@ -1,11 +1,23 @@
-const { getAliasesList, getClassList, getConfig } = require("./load-config");
+const {
+  getAliasesList,
+  getClassList,
+  getConfig,
+  getVariantList,
+} = require("./load-config");
+const {
+  convertExpressionContainerToStaticObject,
+} = require("./expression-to-static-object");
+const {
+  getClassListFromVariantProp,
+} = require("./get-variant-classlist-props");
 
 module.exports = function (babel) {
   const { types: t } = babel;
 
-  const { context: tailwindUseContext, config: tailwindConfig } = getConfig();
-  const aliasesList = getAliasesList(tailwindUseContext);
-  const classList = getClassList(tailwindUseContext);
+  const { context: tailwindUserContext, config: tailwindConfig } = getConfig();
+  const aliasesList = getAliasesList(tailwindUserContext);
+  const classList = getClassList(tailwindUserContext);
+  const variantList = getVariantList(tailwindUserContext);
 
   return {
     visitor: {
@@ -22,14 +34,30 @@ module.exports = function (babel) {
                 const elementName = element.name.name;
                 let elementValue = element.value;
 
-                if (aliasesList.includes(elementName)) {
+                if (variantList.includes(elementName)) {
+                  if (t.isJSXExpressionContainer(element.value)) {
+                    if (t.isObjectExpression(elementValue.expression)) {
+                      const { result } =
+                        convertExpressionContainerToStaticObject(
+                          elementValue.expression.properties
+                        );
+
+                      const variantResolvedValueList =
+                        getClassListFromVariantProp(
+                          result,
+                          variantList,
+                          classList,
+                          [elementName]
+                        );
+                      className += variantResolvedValueList.join(" ") + " ";
+                    }
+                  }
+                } else if (aliasesList.includes(elementName)) {
                   if (t.isJSXExpressionContainer(element.value)) {
                     elementValue = elementValue.expression.value;
                   } else {
                     elementValue = elementValue.value;
                   }
-
-                  console.log("elementValue", elementValue, elementName);
 
                   if (elementName === "className") {
                     className = elementValue;
