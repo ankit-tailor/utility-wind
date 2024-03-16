@@ -1,34 +1,3 @@
-const resolveConfig = require("tailwindcss/resolveConfig.js");
-const path = require("path");
-function getConfigPath() {
-  return path.join(process.cwd(), "./tailwind.config.js");
-  const config = {
-    configPath: "./tailwind.config.js",
-  };
-
-  for (const configFile of [
-    config.configPath,
-    "./tailwind.config.js",
-    "./tailwind.config.cjs",
-  ]) {
-    try {
-      const configPath = path.join(process.cwd(), configFile);
-      fs.accessSync(configPath);
-      return configPath;
-    } catch (err) {}
-  }
-}
-
-function getConfig() {
-  const configFile = getConfigPath();
-  const userConfig = resolveConfig(configFile);
-  console.log("configFile", userConfig);
-
-  // console.log("userConfig", userConfig);
-}
-
-getConfig();
-
 module.exports = function (babel) {
   const { types: t } = babel;
 
