@@ -8,7 +8,7 @@ function getClassListFromVariantProp(
   const propsObjectKeys = Object.keys(propsObject);
   propsObjectKeys.forEach((key) => {
     if (variantList.includes(key)) {
-      if (typeof propsObjectKeys[key] === "object") {
+      if (typeof propsObject[key] === "object") {
         keyPath.push(key);
         getClassListFromVariantProp(
           propsObject[key],
