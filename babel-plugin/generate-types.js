@@ -26,7 +26,48 @@ function getPropertyValue(classname, aliasesMap, value = undefined) {
   }
   return {
     classname,
+    ruleset: isAlias,
     value,
+  };
+}
+
+function getStandardClassNameValue(
+  classname,
+  aliasesMap,
+  targetValue,
+  value = undefined
+) {
+  const splittedClassName = classname.split("-");
+
+  if (value === targetValue) {
+    return {
+      classname,
+      ruleset: undefined,
+      value,
+    };
+  }
+
+  if (splittedClassName.length > 1) {
+    const nextAliasCandidate = splittedClassName
+      .slice(0, splittedClassName.length - 1)
+      .join("-");
+    const nextValueCandidate = [
+      splittedClassName[splittedClassName.length - 1],
+      value,
+    ]
+      .filter(Boolean)
+      .join("-");
+    return getStandardClassNameValue(
+      nextAliasCandidate,
+      aliasesMap,
+      targetValue,
+      nextValueCandidate
+    );
+  }
+  return {
+    classname: `${classname}-${value}`,
+    ruleset: undefined,
+    value: undefined,
   };
 }
 
@@ -38,19 +79,49 @@ function generateTypes() {
   const classListMap = new Map();
 
   classList.map((classname) => {
-    const { classname: aliasedClassNameWithNegativeSymbol, value } =
-      getPropertyValue(classname, tailwindUserContext?.candidateRuleMap);
+    const {
+      classname: propertyClassName,
+      ruleset,
+      value,
+    } = getPropertyValue(classname, tailwindUserContext?.candidateRuleMap);
 
-    if (value) {
+    let aliasedClassNameWithNegativeSymbol = propertyClassName;
+    let propertyValue = value;
+
+    if (ruleset) {
+      for (const rule of ruleset) {
+        if (typeof rule[1] === "object") {
+          const rulObj = rule[1];
+          if (
+            !propertyValue &&
+            rulObj?.nodes &&
+            classname.split("-").length > 1
+          ) {
+            const ruleValue = rulObj?.nodes[0]?.value;
+            const { classname: standardClassName, value: standardValue } =
+              getStandardClassNameValue(
+                classname,
+                tailwindUserContext?.candidateRuleMap,
+                ruleValue
+              );
+            if (standardValue) {
+              aliasedClassNameWithNegativeSymbol = standardClassName;
+              propertyValue = standardValue;
+            }
+          }
+        }
+      }
+    }
+    if (propertyValue) {
       let aliasedClassName = aliasedClassNameWithNegativeSymbol;
 
       if (aliasedClassNameWithNegativeSymbol.startsWith("-")) {
         aliasedClassName = aliasedClassNameWithNegativeSymbol.slice(1);
       }
       const currentClassValue = classListMap.get(aliasedClassName) || [];
-      const nextClassValue = [...currentClassValue, value];
+      const nextClassValue = [...currentClassValue, propertyValue];
       if (aliasedClassNameWithNegativeSymbol.startsWith("-")) {
-        nextClassValue.push(`-${value}`);
+        nextClassValue.push(`-${propertyValue}`);
       }
       classListMap.set(aliasedClassName, nextClassValue);
     } else {
